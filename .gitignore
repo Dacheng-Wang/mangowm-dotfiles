@@ -1,0 +1,14 @@
+# Backups and temporary files
+*.bak
+*.old
+*~
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+
+# OS artifacts
+.DS_Store
+Thumbs.db

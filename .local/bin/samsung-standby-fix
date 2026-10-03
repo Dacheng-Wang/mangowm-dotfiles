@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# 30-Second Grace Period Lockscreen Watchdog
+export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-0}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+echo "[standby-watchdog] Service started. Monitoring DRM wake events..."
+
+# Event-driven listener on kernel DRM netlink socket
+udevadm monitor --kernel --subsystem-match=drm | while read -r line; do
+    if [[ "$line" == *"change"* ]]; then
+        # Check if displays are ON while the session is LOCKED
+        sleep 1
+        STATUS=$(noctalia msg status 2>/dev/null || true)
+        DISPLAYS_ON=$(wlopm 2>/dev/null | grep 'on' || true)
+        
+        if echo "$STATUS" | grep -q '"locked": true' && [ -n "$DISPLAYS_ON" ]; then
+            echo "[standby-watchdog] Displays awake while locked. Starting 30s grace period countdown..."
+            
+            # Count down 30 seconds
+            TIMED_OUT=true
+            for ((i=1; i<=30; i++)); do
+                sleep 1
+                CURRENT_STATUS=$(noctalia msg status 2>/dev/null || true)
+                CURRENT_DISPLAYS=$(wlopm 2>/dev/null | grep 'on' || true)
+                
+                # If user unlocked the screen, abort timeout and keep screens on
+                if ! echo "$CURRENT_STATUS" | grep -q '"locked": true'; then
+                    echo "[standby-watchdog] User unlocked the screen. Cancelling standby timeout."
+                    TIMED_OUT=false
+                    break
+                fi
+                
+                # If displays were turned off by something else, abort
+                if [ -z "$CURRENT_DISPLAYS" ]; then
+                    TIMED_OUT=false
+                    break
+                fi
+            done
+            
+            # If still locked after 30 seconds without unlock, turn displays off
+            if [ "$TIMED_OUT" = true ]; then
+                echo "[standby-watchdog] 30s grace period expired without unlock. Turning displays OFF."
+                wlopm --off '*'
+            fi
+        fi
+    fi
+done

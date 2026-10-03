@@ -1,0 +1,10 @@
+#!/bin/bash
+# Wrapper to isolate Firefox inside a dedicated user scope (app.slice)
+# This prevents systemd-oomd from terminating the compositor/session if a tab leaks memory.
+
+current_cgroup=$(cat /proc/self/cgroup 2>/dev/null)
+if [[ "$current_cgroup" == *"/app.slice/"* ]]; then
+    exec /usr/bin/firefox "$@"
+fi
+
+exec systemd-run --user --scope --slice=app.slice -p Description="Firefox Web Browser" /usr/bin/firefox "$@"

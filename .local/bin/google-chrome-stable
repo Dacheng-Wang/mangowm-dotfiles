@@ -1,0 +1,7 @@
+#!/bin/bash
+current_cgroup=$(cat /proc/self/cgroup 2>/dev/null)
+if [[ "$current_cgroup" == *"/app.slice/"* ]]; then
+    exec /usr/bin/google-chrome-stable "$@"
+fi
+
+exec systemd-run --user --scope --slice=app.slice -p Description="Google Chrome" /usr/bin/google-chrome-stable "$@"
