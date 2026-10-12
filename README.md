@@ -186,7 +186,7 @@ Run `wlr-randr` to list your display connectors:
 | <kbd>Alt</kbd> + <kbd>Space</kbd> | Toggle floating mode |
 | <kbd>Super</kbd> + <kbd>Return</kbd> | Toggle fullscreen |
 | <kbd>Super</kbd> + <kbd>Tab</kbd> | Toggle window overview |
-| <kbd>Super</kbd> + <kbd>x</kbd> | Cycle Scroller proportion preset |
+| <kbd>Super</kbd> + <kbd>e</kbd> | Cycle Scroller proportion preset |
 | <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>e</kbd> | Reset Scroller proportion to 1.0 |
 | <kbd>Super</kbd> + Left Click Drag | Move window |
 | <kbd>Super</kbd> + Right Click Drag | Resize window |
